@@ -180,5 +180,10 @@ defmodule GenReport.ParserTest do
 
       assert report == @correct_answer
     end
+
+    test "Should return error on function call without file" do
+      response = GenReport.build()
+      assert response == {:error, "Insira o nome de um arquivo"}
+    end
   end
 end

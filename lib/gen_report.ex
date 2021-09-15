@@ -23,10 +23,14 @@ defmodule GenReport do
     Enum.reduce(parsed_items, report, &sum_values/2)
   end
 
-  def sum_values(
-        [name, hours, _day, month, year],
-        %{all_hours: all_hours, hours_per_month: hours_per_month, hours_per_year: hours_per_year}
-      ) do
+  def build() do
+    {:error, "Insira o nome de um arquivo"}
+  end
+
+  defp sum_values(
+         [name, hours, _day, month, year],
+         %{all_hours: all_hours, hours_per_month: hours_per_month, hours_per_year: hours_per_year}
+       ) do
     all_hours = Map.put(all_hours, name, all_hours[name] + hours)
 
     old_month_value = get_in(hours_per_month, [name, @report_months[month]])
@@ -41,11 +45,7 @@ defmodule GenReport do
     build_report(all_hours, hours_per_month, hours_per_year)
   end
 
-  def build() do
-    {:error, "Insira o nome de um arquivo"}
-  end
-
-  def gen_acc(entries) do
+  defp gen_acc(entries) do
     names =
       entries
       |> Enum.map(&hd(&1))
@@ -66,7 +66,7 @@ defmodule GenReport do
     build_report(all_hours, hours_per_month, hours_per_year)
   end
 
-  def build_report(all_hours, hours_per_month, hours_per_year) do
+  defp build_report(all_hours, hours_per_month, hours_per_year) do
     %{
       all_hours: all_hours,
       hours_per_month: hours_per_month,
