@@ -29,7 +29,7 @@ defmodule GenReport do
       |> Task.async_stream(&build/1)
       |> Enum.reduce(fn {:ok, result}, {:ok, report} -> sum_reports(result, report) end)
 
-    {:ok, result}
+    result
   end
 
   def build_multiple() do

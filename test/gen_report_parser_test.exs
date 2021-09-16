@@ -1,6 +1,8 @@
 defmodule GenReport.ParserTest do
   use ExUnit.Case
 
+  @filenames ["part_1.csv", "part_2.csv", "part_3.csv"]
+
   @correct_answer %{
     all_hours: %{
       "Cleiton" => 13797,
@@ -184,6 +186,22 @@ defmodule GenReport.ParserTest do
     test "Should return error on function call without file" do
       response = GenReport.build()
       assert response == {:error, "Insira o nome de um arquivo"}
+    end
+  end
+
+  describe "build_multiple/1" do
+    test "Should build report correclty" do
+      {:ok, report} =
+        @filenames
+        |> GenReport.build_multiple()
+
+      assert report == @correct_answer
+    end
+
+    test "Should return error on no filenames provided" do
+      result = GenReport.build_multiple()
+
+      assert result == {:error, "argumento precisa ser uma lista"}
     end
   end
 end
