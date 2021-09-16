@@ -23,6 +23,19 @@ defmodule GenReport do
     Enum.reduce(parsed_items, report, &sum_values/2)
   end
 
+  def build_multiple(filenames) when is_list(filenames) do
+    result =
+      filenames
+      |> Task.async_stream(&build/1)
+      |> Enum.reduce(fn {:ok, result}, {:ok, report} -> sum_reports(result, report) end)
+
+    {:ok, result}
+  end
+
+  def build_multiple() do
+    {:error, "argumento precisa ser uma lista"}
+  end
+
   def build() do
     {:error, "Insira o nome de um arquivo"}
   end
@@ -72,5 +85,38 @@ defmodule GenReport do
       hours_per_month: hours_per_month,
       hours_per_year: hours_per_year
     }
+  end
+
+  defp sum_reports(
+         %{
+           all_hours: all_hours1,
+           hours_per_month: hours_per_month1,
+           hours_per_year: hours_per_year1
+         },
+         %{
+           all_hours: all_hours2,
+           hours_per_month: hours_per_month2,
+           hours_per_year: hours_per_year2
+         }
+       ) do
+    new_all_hours = Map.merge(all_hours1, all_hours2, fn _key, val1, val2 -> val1 + val2 end)
+
+    new_hours_per_month = deep_merge(hours_per_month1, hours_per_month2)
+
+    new_hours_per_year = deep_merge(hours_per_year1, hours_per_year2)
+
+    {:ok, build_report(new_all_hours, new_hours_per_month, new_hours_per_year)}
+  end
+
+  def deep_merge(left, right) do
+    Map.merge(left, right, &deep_resolve/3)
+  end
+
+  defp deep_resolve(_key, left, right) when is_map(left) and is_map(right) do
+    deep_merge(left, right)
+  end
+
+  defp deep_resolve(_key, left, right) when is_integer(left) and is_integer(right) do
+    left + right
   end
 end
